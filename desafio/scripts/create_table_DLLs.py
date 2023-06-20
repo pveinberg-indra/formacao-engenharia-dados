@@ -25,11 +25,12 @@ for file in files:
         {'tabela': file.split('.')[0].lower(), 
          'campos': campos_tabela})
 
-
 # Set DLLs
 DB_EXT=config['HIVE']['DB_EXT'].lower()
 DB_STG=config['HIVE']['DB_STG'].lower()
-HDFS_BASE_DIR=config['HDFS']['HDFS_BASE_DIR']
+HDFS_BASE_DIR = config['HDFS']['HDFS_BASE_DIR']
+HDFS_RAW_DIR= config['HDFS']['HDFS_BASE_DIR'] + config['HDFS']['HDFS_LOCAL_DIR']
+HDFS_GLD_DIR= config['HDFS']['HDFS_BASE_DIR'] + config['HDFS']['HDFS_LOCAL_GOLD_DIR']
 PARTICAO=(datetime.today() - timedelta(1)).strftime('%Y%m%d')
 
 for tbl in metadados:
@@ -48,7 +49,7 @@ for tbl in metadados:
     ROW FORMAT DELIMITED
     FIELDS TERMINATED BY ";"
     STORED AS TEXTFILE
-    location  "{HDFS_BASE_DIR}/raw/{tbl['tabela']}"
+    location  "{HDFS_RAW_DIR}/{tbl['tabela']}"
     TBLPROPERTIES ("skip.header.line.count"="1");
 
     SELECT * FROM {DB_EXT}.tbl_{tbl['tabela']} LIMIT 5;
