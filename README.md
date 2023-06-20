@@ -9,4 +9,4 @@ O objetivo deste projeto é desenvolver um pipeline para movimentar dados a part
 3. Transferência dos arquivos para filesystem HDFS, dentro do servidor _Hadoop_
 4. Criação de estrutura de tabelas e carga na base relacional _Hive_
 5. Desenvolvimento e transformação em tabelas dimensionais e persistência das mesmas
-6. Desenvolvimento de dashboard (Power BI) e configuração de conexão com servidor remoto. 
+6. Desenvolvimento de dashboard (Power BI) e configuração de conexão com servidor remoto.
