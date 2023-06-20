@@ -5,14 +5,25 @@ source <(grep = config.ini)
 
 echo "Iniciando criação de diretórios no ambiente em ${DATE}..."
 
-mkdir -p /workspace/formacao-engenharia-dados
-mkdir -p /workspace/formacao-engenharia-dados/desafio/scripts/hql
-mkdir -p /workspace/formacao-engenharia-dados/desafio/logs
+# Criação diretório raíz
+mkdir -p ${BASE_DIR}
 
-mkdir -p /workspace/formacao-engenharia-dados/desafio/raw
-mkdir -p /workspace/formacao-engenharia-dados/desafio/gold
+# Criação diretório com scripts e hql para DLLs das tabelas Hive
+mkdir -p ${BASE_DIR}${HQL_DIR}
 
-docker exec namenode hdfs dfs -mkdir -p /datalake/desafio/raw
-docker exec namenode hdfs dfs -mkdir -p /datalake/desafio/gold
+# Criação do diretório de logs
+mkdir -p ${BASE_DIR}${LOG_DIR}
+
+# Criação dos diretórios run e app
+mkdir -p ${BASE_DIR}${RUN_DIR}
+mkdir -p ${BASE_DIR}${APP_DIR}
+
+# Criação de deretórios raw e gold (edge node)
+mkdir -p ${BASE_DIR}${HDFS_LOCAL_DIR}
+mkdir -p ${BASE_DIR}${HDFS_LOCAL_GOLD_DIR}
+
+# Criação da estrutura no HDFS (namenode)
+docker exec namenode hdfs dfs -mkdir -p ${HDFS_BASE_DIR}${HDFS_LOCAL_DIR}
+docker exec namenode hdfs dfs -mkdir -p ${HDFS_BASE_DIR}${HDFS_LOCAL_GOLD_DIR}
 
 echo "Finalizado com sucesso"
