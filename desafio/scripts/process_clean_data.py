@@ -25,7 +25,7 @@ DB_EXT = config['HIVE']['DB_EXT'].lower()
 DB_STG = config['HIVE']['DB_STG'].lower()
 entidades = config['EDGE']['ENTIDADES'].replace(
     "(", "").replace(")", "").replace('"', '').split(' ')
-HDFS_GOLD_DIR = config['HDFS']['HDFS_BASE_DIR'] + "/gold"
+HDFS_GOLD_DIR = config['HDFS']['HDFS_LOCAL_GOLD_DIR']
 LOG_DIR = config['GERAL']['LOG_DIR']
 
 # Configuração de arquivo de log
