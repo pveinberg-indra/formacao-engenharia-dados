@@ -6,7 +6,7 @@ source <(grep = config.ini)
 echo "Iniciando criação de tabelas no Hive em ${DATE}..."
 
 echo "Criando arquivos DLL para posterior criação de tabelas..." 
-python3 create_table_DLLs.py
+python3 07_create_table_DLLs.py
 
 echo "Criando tabelas no HIVE..."
 
