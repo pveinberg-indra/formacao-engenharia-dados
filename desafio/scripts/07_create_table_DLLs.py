@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 # Imports
-import pandas as pd
 import os
 from datetime import datetime, timedelta
+import pandas as pd
 from configparser import ConfigParser
 
 # Config files
 config = ConfigParser()
 config.read('./config.ini')
-diretorio_arquivos = os.path.expanduser(f"{config['GERAL']['BASE_DIR']}{config['EDGE']['EDGE_BASE_DIR']}") 
-destino_hqls = os.path.expanduser(f"{config['GERAL']['BASE_DIR']}{config['GERAL']['HQL_DIR']}") 
+diretorio_arquivos = os.path.expanduser(config['GERAL']['BASE_DIR'] + config['HDFS']['HDFS_LOCAL_DIR'])
+destino_hqls = os.path.expanduser(config['GERAL']['BASE_DIR'] + config['GERAL']['HQL_DIR']) 
 
 # Reads files in source folder
 files = os.listdir(diretorio_arquivos)
@@ -19,8 +19,8 @@ files
 # Read metadata
 metadados = []
 for file in files:
-    data = pd.read_csv(f"{diretorio_arquivos}/{file}", sep=';')
-    campos_tabela = [f"{column.lower().replace(' ', '_').replace('/','_')} string" for column in list(data.columns)]
+    data = pd.read_csv("{}/{}".format(diretorio_arquivos, file), sep=';')
+    campos_tabela = ["{} string".format(column.lower().replace(' ', '_').replace('/','_')) for column in list(data.columns)]
     metadados.append(
         {'tabela': file.split('.')[0].lower(), 
          'campos': campos_tabela})
