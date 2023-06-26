@@ -9,8 +9,8 @@ echo "Rodando scrips python em ${DATE}..."
 docker exec jupyter-spark /opt/spark-2.4.1-bin-without-hadoop/bin/spark-submit /desafio/scripts/process/process.py
 
 echo "Removendo arquivos existentes"
-rm ${BASE_DIR}/desafio/*.zip
-rm ${BASE_DIR}/desafio/gold/*.csv
+rm ${BASE_DIR}/desafio/*.zip -r 
+rm ${BASE_DIR}/desafio/gold/*.csv -r 
 
 echo "Iniciando cópia de HDFS para diretório local [${HDFS_LOCAL_GOLD_DIR}] "
 for entidade in "${ENTIDADES_DIM[@]}"
