@@ -155,8 +155,6 @@ df_stage.select(campos_num).collect()
 
 # fim declaracao stage
 
-dir_teste = '/datalake/teste_final'
-
 # DIM_LOCALIDADE
 dim_localidade = spark.sql('''
     SELECT DISTINCT DW_LOCALIDADE,
@@ -195,9 +193,9 @@ ft_vendas = spark.sql('''
     FROM stage
 ''')
 
-save_df(_df=dim_tempo, _name='dim_tempo', _dir=dir_teste)
-save_df(_df=dim_clientes, _name='dim_clientes', _dir=dir_teste)
-save_df(_df=dim_localidade, _name='dim_localidade', _dir=dir_teste)
-save_df(_df=ft_vendas, _name='ft_vendas', _dir=dir_teste)
+save_df(_df=dim_tempo, _name='dim_tempo', _dir=HDFS_GOLD_DIR)
+save_df(_df=dim_clientes, _name='dim_clientes', _dir=HDFS_GOLD_DIR)
+save_df(_df=dim_localidade, _name='dim_localidade', _dir=HDFS_GOLD_DIR)
+save_df(_df=ft_vendas, _name='ft_vendas', _dir=HDFS_GOLD_DIR)
 
 logging.info("Processo finalizado.")
