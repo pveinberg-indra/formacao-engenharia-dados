@@ -183,7 +183,11 @@ dim_clientes = spark.sql('''SELECT DISTINCT DW_CLIENTES,
 
 # FT_VENDAS
 ft_vendas = spark.sql('''
-    SELECT DISTINCT DW_VENDAS,
+    SELECT DISTINCT 
+        DW_VENDAS,
+        DW_CLIENTES,
+        DW_TEMPO,
+        DW_LOCALIDADE,
         list_price, 
         sales_amount, 
         sales_amount_based_on_list_price, 
@@ -192,6 +196,8 @@ ft_vendas = spark.sql('''
         sales_price
     FROM stage
 ''')
+
+logging.info("UPDATING NEW FT_VENDAS TABLE")
 
 save_df(_df=dim_tempo, _name='dim_tempo', _dir=HDFS_GOLD_DIR)
 save_df(_df=dim_clientes, _name='dim_clientes', _dir=HDFS_GOLD_DIR)
