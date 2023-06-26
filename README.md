@@ -19,3 +19,5 @@ root
 |
 + raw
 ```
+
+docker exec jupyter-spark /opt/spark-2.4.1-bin-without-hadoop/bin/spark-submit /desafio/scripts/process/process.py
