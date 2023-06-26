@@ -129,7 +129,7 @@ df_stage = df_stage \
 df_stage = df_stage.withColumn('DW_VENDAS', sha2(concat_ws("", df_stage.customerkey, df_stage.invoice_date, df_stage.sales_price), 256))
 df_stage = df_stage.withColumn('DW_CLIENTES', sha2(concat_ws("", df_stage.customerkey, df_stage.customer), 256))
 df_stage = df_stage.withColumn('DW_TEMPO', sha2(concat_ws("", df_stage.invoice_date), 256))
-df_stage = df_stage.withColumn('DW_LOCALIDADE', sha2(concat_ws("", df_stage.customerkey, df_stage.address_number), 256))
+df_stage = df_stage.withColumn('DW_LOCALIDADE', sha2(concat_ws("", df_stage.customerkey, df_stage.address_number, df_stage.city, df_stage.country, df_stage.state), 256))
 
 # tratar campos em branco ou nulos
 ni = "Não Informado"
@@ -157,7 +157,8 @@ df_stage.select(campos_num).collect()
 
 # DIM_LOCALIDADE
 dim_localidade = spark.sql('''
-    SELECT DISTINCT DW_LOCALIDADE,
+    SELECT DISTINCT 
+        DW_LOCALIDADE,
         address_number,
         city,
         state,
