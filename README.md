@@ -14,6 +14,8 @@ O objetivo deste projeto é desenvolver um pipeline para movimentar dados a part
 6. Desenvolvimento e transformação em tabelas dimensionais e persistência das mesmas [pendente]
 7. Finalmente, desenvolvimento de dashboard (Power BI) em ``/desafio/app/Projeto Vendas.pbix``, esta implementação utiliza as tabelas dimensionais disponibilizadas em ``/desafio/gold`` 
 
+![fluxo_dados](./images/fluxo_dados.png)
+
 ## Estrutura de arquivos
 ```
 root
@@ -21,11 +23,22 @@ root
 + desafio
 +- raw
     +- vendas.csv
-    +- hello
+    +- ...
 +- gold
+    +- ft_vendas.csv
+    +- ...
 +- app
-+- run
+    +- Projeto Vendas.pbix
 + raw
+   +- VENDAS.csv
++ scripts
+   +- 01_criacao_pastas.sh
+   +- pre_process
+         +- pyton
+   +- process
+         +- python
+   +- hql
+      +- create_table_...hql
 ```
 
 ### O que é big data
@@ -68,12 +81,17 @@ Os scripts do projeto podem ser encontrados em [``/desafio/scripts``](desafio/sc
 |06_process.py|``/desafio/scripts/process``|python|Este arquivo realiza as transformações necessárias nos dados das tabelas Hive e cria os arquivos dimensionais que servirão como base para a montagem do dashboard final. 
 |07_copia_do_hdfs_para_local.sh|``/desafio/scripts``|bash|Script que roda o python mencionado acima e movimenta os arquivos que foram criados no HDFS para o diretório local ``/desafio/gold``
 
-
-
 ## Passo a passo
 
 ### 1. Criação dos diretórios do projeto
-Processo inicia com um conjunto de arquivos na pasta ```/raw```, estes arquivo possuem dados de vendas.
+O primeiro script a ser executado deve criar todos os diretórios necessários para a implementação do sistema. 
+
+```
+$ cd desafio/scripts
+$ bash 01_criacao_ambiente.sh
+``` 
+### 2. Movimentar os arquivos fonte
+Após a criação dos diretórios, o processo inicia com um conjunto de arquivos na pasta ``/raw`` (esta pasta está na raíz do projeto e não é a mesma onde serão enviadas as fontes dedados). 
 
 |Tabela|Formato|Tamanho|Detalhes|
 |------|-------|-------|--------|
@@ -83,7 +101,6 @@ Processo inicia com um conjunto de arquivos na pasta ```/raw```, estes arquivo p
 |REGIAO|csv|0.10Mb|Região da localidade 
 |DIVISAO|csv|0.05Mb|Divisão da localidade
 
-### 2. Movimentar os arquivos fonte
 O primeiro passo deste processo será movimentar os arquivos da fonte, que poderiam estar em outro servidor ou formato, para a primeira pasta do nosso servidor. Chamaremos esta pasta de servidor de borda, já que entendemos que será o local de entrada das nossas informações. 
     1. Arquivo ```/desafio/scripts/config.ini```: utilizamos um arquivo centralizado contendo as variáveis que serão utilizadas no projeto. Decidimos pela utilização deste formato já que atende tanto os scripts do tipo ```bash```, quanto ```python``` 
     2. Arquivo ```/desafio/scripts/move_files_to_edge.sh```: este primeiro script recupera o nome das entidades (arquivos) que se encontram na pasta de origem e itera o nome de cada um deles realizando 2 ações principais: 
