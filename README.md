@@ -84,7 +84,11 @@ Os scripts do projeto podem ser encontrados em [``/desafio/scripts``](desafio/sc
 ## Passo a passo
 
 ### 1. Criação dos diretórios do projeto
-O primeiro script a ser executado deve criar todos os diretórios necessários para a implementação do sistema. 
+O primeiro script a ser executado deve criar todos os diretórios necessários para a implementação do sistema.  
+
+Origem das informações. Arquivos csv disponíveis em diversas fontes: csv online, zipfile local, etc
+
+
 
 ```
 $ cd desafio/scripts
@@ -101,6 +105,9 @@ Após a criação dos diretórios, o processo inicia com um conjunto de arquivos
 |REGIAO|csv|0.10Mb|Região da localidade 
 |DIVISAO|csv|0.05Mb|Divisão da localidade
 
+(*) Filesystem com os dados crus, não processados. É o primeiro estagio onde os arquivos são colocados dentro do fluxo.
+
+
 O primeiro passo deste processo será movimentar os arquivos da fonte, que poderiam estar em outro servidor ou formato, para a primeira pasta do nosso servidor. Chamaremos esta pasta de servidor de borda, já que entendemos que será o local de entrada das nossas informações. 
     1. Arquivo ```/desafio/scripts/config.ini```: utilizamos um arquivo centralizado contendo as variáveis que serão utilizadas no projeto. Decidimos pela utilização deste formato já que atende tanto os scripts do tipo ```bash```, quanto ```python``` 
     2. Arquivo ```/desafio/scripts/move_files_to_edge.sh```: este primeiro script recupera o nome das entidades (arquivos) que se encontram na pasta de origem e itera o nome de cada um deles realizando 2 ações principais: 
@@ -116,6 +123,9 @@ O segundo passo será movimentar os arquivos recebidos para o servidor HDFS que 
    1. Para realizar esta operação será necessário executar o script ```/desafio/scripts/move_to_hdfs.sh``` que fará a operação:
    2. Os arquivos serão movimentados para a pasta HDFS ```/datalake/desafio/raw``` 
    
+(*) Arquivos são transferidos a uma pasta dentro do datalake HDFS. Assim como no ponto 2, a pasta raw conterá os arquivos sem tratamento.
+
+
 ### 4. Criação dinámica de DLLs
 Uma vez que as informações estejam disponíveis no servidor HDFS, será o momento de criar os DLLs para as tabelas. 
    1. Através de um script ```python```, será lido cada um dos arquivos e extraído deles os cabeçalhos com o nome das colunas. 
@@ -129,6 +139,9 @@ Com as informações no servidor Hadoop e as DLLs criadas, chega o momento de ex
       1. 2 bancos de dados: ```desafio_db_ext``` e ```desafio_db_stg```; 
       2. Para cada um destes bancos teremos as tabelas ```vandas, clientes, endereco, regiao, ???```
 
+(*) Banco de dados relacional dentro do ambiente Hadoop. Após as tabelas criadas, os dados são inseridos nessa estrutura.
+
+#### Diagrama relacional
 ![diagrama_relacional](./images/diagrama_relacional.png)
 
 ### 6. Tratamento dos dados
@@ -152,5 +165,6 @@ Com todas as informações consistentes, partimos para a organização da inform
 |DIM_LOCALIDADE|Dimensão com informações geográficas como Estado, cidade ou país|
 |DIM_TEMPO|A dimensão de tempo, a través da data de fatura, foi extraído ano, mês e trimestre. |
 
+#### Diagrama Dimensional
 ![modelo_dimensional](images/diagrama_dimensional.png)
 
