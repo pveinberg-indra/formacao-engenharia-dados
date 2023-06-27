@@ -123,14 +123,3 @@ Com todas as informações consistentes, partimos para a organização da inform
 
 ![modelo_dimensional](images/diagrama_dimensional.png)
 
-
-
-## Rascunhos 
-
-> explicação de andre para config do acesso remoto: 3:16 do dia 20/6
-> 
-``ssh -L 10000:pveinbergin-formacaoeng-pqpkh8mabez:10000 pveinbergin-formacaoeng-pqpkh8mabez#HaaV_aeKfaSdVlMSluw3zPLYLIDKG1kC@pveinbergin-formacaoeng-pqpkh8mabez.ssh.ws-us101.gitpod.io`` 
-
-``ssh pveinbergin-formacaoeng-pqpkh8mabez#HaaV_aeKfaSdVlMSluw3zPLYLIDKG1kC@pveinbergin-formacaoeng-pqpkh8mabez.ssh.ws-us101.gitpod.io/desafio/gold``
-
-``ssh pveinbergin-formacaoeng-pqpkh8mabez#AVGrGF1mJ6IXsbdLWBXTh7t.TsZjm43v@pveinbergin-formacaoeng-pqpkh8mabez.ssh.ws-us101.gitpod.io/desafio``
