@@ -1,12 +1,12 @@
 #! /bin/bash
 
 # Carregando configuração geral 
-source <(grep = config.ini)
+source <(grep = ../config.ini)
 
 echo "Iniciando criação de tabelas no Hive em ${DATE}..."
 
 echo "Criando arquivos DLL para posterior criação de tabelas..." 
-python3 07_create_table_DLLs.py
+python3 05_create_table_DLLs.py
 
 echo "Criando tabelas no HIVE..."
 

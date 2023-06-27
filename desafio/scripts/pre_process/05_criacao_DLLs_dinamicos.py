@@ -8,7 +8,7 @@ from configparser import ConfigParser
 
 # Config files
 config = ConfigParser()
-config.read('./config.ini')
+config.read('./../config.ini')
 diretorio_arquivos = os.path.expanduser(config['GERAL']['BASE_DIR'] + config['HDFS']['HDFS_LOCAL_DIR'])
 destino_hqls = os.path.expanduser(config['GERAL']['BASE_DIR'] + config['GERAL']['HQL_DIR']) 
 

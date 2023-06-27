@@ -14,11 +14,6 @@ O objetivo deste projeto é desenvolver um pipeline para movimentar dados a part
 6. Desenvolvimento e transformação em tabelas dimensionais e persistência das mesmas [pendente]
 7. Finalmente, desenvolvimento de dashboard (Power BI) em ``/desafio/app/Projeto Vendas.pbix``, esta implementação utiliza as tabelas dimensionais disponibilizadas em ``/desafio/gold`` 
 
-## Github, gitpod
-
-- Ambiente em nuvem
-
-
 ## Estrutura de arquivos
 ```
 root
@@ -33,41 +28,60 @@ root
 + raw
 ```
 
-# Trilha para se tornar um desenvolvedor big data
-
-
-
 ### O que é big data
+Grandes conjuntos de dados que precisam ser processados e armazenados: 
 
-grandes conjuntos de dados que precisam ser processados e armazenados: 
+#### 3 V's 
+* **Volume**: Grandes volumes de dados são gerados e armazenados o tempo todo;
+* **Velocidade**: Estes dados, em muitos casos, precisam estar disponíveis em curtos periodos de tempo para ter relevância; 
+* **Variedade**: Dados de diversas fontes, com vários formatos e estruturas fazem parte do cotidiano do bigdata. 
 
-3Vs Velocidade, Volume, Variedade
+## _Modelo relacional_ x _Modelo dimensional_
+Tradicionalmente, as bases de dados transacionais, que armazenam dados da operação do negócio, são mantidas em SGBDs relacionais como Oracle, MSSql, MySQL ou Postgres. Uma das características deste tipo de bases é a _normalização_, onde o objetivo é evitar a persistência de registros duplicados. 
 
-modelo relacional x modelo dimensional
+Por outro lado, nos ambientes de big data, se trabalha com outro paradigma chamado _dimensional_. Neste paradigma, não se procura evitar a duplicidade dos dados, pois o objetivo não é transacional, mas analítico. Assim, o percurso deve ser em sentido inverso: _desnormalizando_ os registros e agrupando os dados em conjuntos maiores que façam sentido para o negócio.   
 
 ## O ambiente
+Este projeto foi desenvolvido em ambiente linux utilizando a plataforma [gitpod.io](https://gitpod.io/) e o repositório [github](https://github.com/).
 
-docker, docker-compose
+### Outras tecnologias necessárias
 
-python 
-pyspark 
-HDFS
-namenode
-hive-server
-jupyter and pyspark
+* [docker](https://www.docker.com/)
+* [docker-compose](https://docs.docker.com/compose/)
+* [python](https://www.python.org/)
+* [pyspark](https://spark.apache.org/docs/latest/api/python/)
+* [hadoop](https://hadoop.apache.org/)
+* [hive](https://hive.apache.org/)
+* [jupyter notebook](https://jupyter.org/)
 
-## Paso a passo
+### Scripts 
+Os scripts do projeto podem ser encontrados em [``/desafio/scripts``](desafio/scripts/)
 
-### 1. Criação do ambiente
+|Arquivo|Diretório|Tipo|Obs
+|----|----|---|---
+|config.ini|``/desafio/scripts``|ini file|Definição das variáveis do projeto
+|01_criacao_ambiente.sh|``/desafio/scripts``|bash|Criação dos diretórios necessários para o projeto
+|02_transferencia_para_edge_node.sh|``/desafio/scripts``|bash|Movimentação do arquivos externos para o _filesystem_ (neste caso apenas uma pasta) dentro do ambiente do projeto
+|03_transferencia_para_hdfs.sh|``/desafio/scripts``|bash|Movimentação do do _filesystem_ para o _datalake_ HDFS
+|04_criacao_tabelas_hive.sh|``/desafio/scripts/pre_process``|bash|Este arquivo dispara um script ``python`` que cria dinamicamente os DLLs e enseguida utiliza estes para criar as tabelas do sistema.  
+|05_create_table_DLLs.py|``/desafio/scripts/pre_process``|python|Este script desenvolve de forma dinámica os DLLs para criação das tabelas dentro do Hive.
+|06_process.py|``/desafio/scripts/process``|python|Este arquivo realiza as transformações necessárias nos dados das tabelas Hive e cria os arquivos dimensionais que servirão como base para a montagem do dashboard final. 
+|07_copia_do_hdfs_para_local.sh|``/desafio/scripts``|bash|Script que roda o python mencionado acima e movimenta os arquivos que foram criados no HDFS para o diretório local ``/desafio/gold``
+
+
+
+## Passo a passo
+
+### 1. Criação dos diretórios do projeto
 Processo inicia com um conjunto de arquivos na pasta ```/raw```, estes arquivo possuem dados de vendas.
 
 |Tabela|Formato|Tamanho|Detalhes|
 |------|-------|-------|--------|
-|VENDAS|csv|x.xx Mb|Informações de vendas, preços, descontos, etc
-|CLIENTES|csv|x.xx Mb|Informações dos clientes|
-|ENDERECO|csv|x.xx Mb|Informações do endereço (ligada aos clientes)
-|REGIAO|csv|x.xx Mb|Região 
-|??|csv|x.xx Mb|??
+|VENDAS|csv|10.83Gb|Informações de vendas, preços, descontos, etc
+|CLIENTES|csv|46.72Mb|Informações dos clientes, esta entidade permite o relacionamento com as outras 3 (a seguir)
+|ENDERECO|csv|77.87Mb|Informações do endereço ligada aos clientes e necessária para a tabela dimensional de localidade. 
+|REGIAO|csv|0.10Mb|Região da localidade 
+|DIVISAO|csv|0.05Mb|Divisão da localidade
 
 ### 2. Movimentar os arquivos fonte
 O primeiro passo deste processo será movimentar os arquivos da fonte, que poderiam estar em outro servidor ou formato, para a primeira pasta do nosso servidor. Chamaremos esta pasta de servidor de borda, já que entendemos que será o local de entrada das nossas informações. 
