@@ -138,7 +138,8 @@ campos_string = ['address_number', 'city', 'state', 'country', 'customer']
 
 for c in campos_string:
     df_stage = df_stage.withColumn(c, regexp_replace(col(c), '\s{2,}', ni)) \
-        .withColumn(c, when(col(c).isNull(), ni).otherwise(col(c))) 
+        .withColumn(c, when(col(c).isNull(), ni).otherwise(col(c))) \
+        .withColumn(c, when(col(c) == '', ni).otherwise(col(c)))
     
 # Tratamento dos campos numéricos (nulos p zero e formato ok)
 campos_num = ['list_price', 'sales_amount', 'sales_amount_based_on_list_price', \
