@@ -155,32 +155,79 @@ Para executar este script:
 $ cd /desafio/scripts
 $ bash 04_criacao_tabelas_hive.sh
 ```
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-### 5. Criação de tabelas
-Com as informações no servidor Hadoop e as DLLs criadas, chega o momento de executar a criação das bases de dados, tabelas e carga de dados. 
-   1. Para realizar esta operação, o script ```/desafio/scripts/upload_to_hive.sh``` deve, mas uma vez, recuperar os nomes de todas as tabelas e processar para cada uma delas, a criação das tabelas externas e gerenciadas, assim como realizar a vinculação das mesmas a partir dos arquivos já mencionados.
-   2. O resultado de estas operações deve apresentar a seguinte estrutura no Hive:
-      1. 2 bancos de dados: ```desafio_db_ext``` e ```desafio_db_stg```; 
-      2. Para cada um destes bancos teremos as tabelas ```vandas, clientes, endereco, regiao, ???```
 
-(*) Banco de dados relacional dentro do ambiente Hadoop. Após as tabelas criadas, os dados são inseridos nessa estrutura.
+### 5. Criação de tabelas
+Com as informações no servidor Hadoop e as DLLs criadas, já é possível executar a criação das bases, tabelas e carga dos dados. 
+
+Para realizar esta operação, o script ``/desafio/scripts/pre_process/04_criacao_tabelas_hive.sh`` deve, mas uma vez, recuperar os nomes de todas as tabelas e processar para cada uma delas, a criação das tabelas externas e gerenciadas, assim como realizar a vinculação das mesmas a partir dos arquivos já mencionados. Este script, dispara o início do ``05_criacao_DLLs_dinamicos.py``, na mesma pasta, que cria dinamicamente as tabelas.  
+
+Para executar este script:
+
+```
+$ cd /desafio/scripts/pre_process
+$ bash 04_criacao_tabelas_hive.sh
+```
+
+O resultado destas operações deve apresentar a seguinte estrutura no Hive (*):
+
+1. Dois bancos de dados: ``desafio_db_ext`` e ``desafio_db_stg``; 
+2. Para cada um destes bancos teremos as tabelas ``tbl_vandas; tbl_clientes; tbl_endereco; tbl_regiao; tbl_divisao``
+
+(*) _Banco de dados relacional dentro do ambiente Hadoop. Após as tabelas criadas, os dados são inseridos nessa estrutura._
 
 #### Diagrama relacional
 ![diagrama_relacional](./images/diagrama_relacional.png)
 
-### 6. Tratamento dos dados
-Com todos os dados consolidados na base, devemos trabalhar os dados, seguindo os critérios: a) Strings vazias ou nulas = "Não informado", b) Números nulos = 0.0
-   1. Para realizar esta operação devemos rodar script ```python``` no ambiente pyspark. Realizaremos as seguintes operações:
-      1. Tratamento das strings vazias [explicar]
-      2. Tratamento dos números [explicar]
-      3. Tratamento das datas [explicar]
+### 6. Tratamento dos dados e persistência de tabelas dimensionais
+Com todos os dados consolidados na base, devemos transforar os dados, seguindo os critérios: 
+1. Strings vazias ou nulas = "Não informado";
+2. Números nulos = 0
 
-como rodar?
+Para realizar esta operação devemos rodar script ``python`` no ambiente ``pyspark``. Realizaremos as seguintes operações:
 
-```docker exec jupyter-spark /opt/spark-2.4.1-bin-without-hadoop/bin/spark-submit /desafio/scripts/process/process.py``` 
+#### Tratamento dos campos de tipo texto
 
-### 7. Tabelas dimensionais 
-Com todas as informações consistentes, partimos para a organização da informação em tabelas dimensionais, que diferente das tabelas relacionais do Hive, estão desnormalizadas e devem ser montadas [como mostrado na figura]. 
+```python
+# tratar campos em branco ou nulos
+ni = "Não Informado"
+campos_string = ["address_number", "city", "state", "country", "customer"]
+
+for c in campos_string:
+    df_stage = df_stage.withColumn(c, regexp_replace(col(c), "\s{2,}", ni)) \
+        .withColumn(c, when(col(c).isNull(), ni).otherwise(col(c))) \
+        .withColumn(c, when(col(c) == '', ni).otherwise(col(c)))
+    
+```
+#### Tratamento dos campos de tipos numéricos
+```python
+# Tratamento dos campos numéricos (nulos p zero e formato ok)
+campos_num = ["list_price", "sales_amount", "sales_amount_based_on_list_price", \
+              "sales_cost_amount", "sales_margin_amount", "sales_price"]
+
+for c in campos_num:
+    df_stagea = df_stage.withColumn(c, regexp_replace(col(c), ",", "")) \
+        .withColumn(c, regexp_replace(col(c), ",", ".")) \
+        .withColumn(c, col(c).cast("float"))
+```
+
+#### Tratamento dos campos data
+```python
+# Cast campos data
+campos_data = ["invoice_date"]
+cast_date_udf =  udf(lambda x: cast_date(x), DateType())  
+
+for data in campos_data:
+    df_stage = df_stage.withColumn(data, cast_date_udf(col(data)).alias(data))
+```
+
+Este script deve ser executado dentro do container ``docker``:
+
+``$ docker exec jupyter-spark /opt/spark-2.4.1-bin-without-hadoop/bin/spark-submit /desafio/scripts/process/process.py`` 
+
+O resultado desta implementação deve colocar, na pasta ``/datalake/desafio/gold/[nome_da_tabela]`` do HDFS, cada uma das informações dimensionais, que diferente das tabelas relacionais do Hive, estão _desnormalizadas_ e devem ser montadas como mostrado na figura abaixo. 
+
+#### Diagrama Dimensional
+![modelo_dimensional](images/diagrama_dimensional.png)
 
 |Tabela|Obs|
 |-|-|
@@ -189,6 +236,19 @@ Com todas as informações consistentes, partimos para a organização da inform
 |DIM_LOCALIDADE|Dimensão com informações geográficas como Estado, cidade ou país|
 |DIM_TEMPO|A dimensão de tempo, a través da data de fatura, foi extraído ano, mês e trimestre. |
 
-#### Diagrama Dimensional
-![modelo_dimensional](images/diagrama_dimensional.png)
+As informações dimensionais, geradas através do script 
 
+### 8. Exportação para o servidor local
+A partir dos dados dimensionais, deve ser executado o script ``07_copia_do_hdfs_para_local.sh`` para disponibilizar as informações na pasta ``/desafio/gold`` de onde poderão ser consumidas pelo _cliente_ (Power BI).
+
+### 9. Power BI
+Na pasta ``/desafio/app`` encontramos o arquivo ``Projeto Vendas.pbix`` que implementa a consulta dos campos dimensionais da pasta ``/desafio/gold`` e apresenta um dashboard com as seguintes informações: 
+
+* Indicadores de quantidade de vendas
+* Vendas por cliente
+* Vendas por ano
+* Vendas por estado
+* Valor total de vendas
+
+#### Captura do dashboard implementado
+![dashboard](./images/dashboard_resultado.PNG)
