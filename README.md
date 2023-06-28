@@ -1,45 +1,9 @@
 # PIPELINE DE DADOS DE VENDAS
 
-![Shell Script](https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Apache Hadoop](https://img.shields.io/badge/Apache%20Hadoop-66CCFF?style=for-the-badge&logo=apachehadoop&logoColor=black) ![Apache Hive](https://img.shields.io/badge/Apache%20Hive-FDEE21?style=for-the-badge&logo=apachehive&logoColor=black) 
+![Shell Script](https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Apache Hadoop](https://img.shields.io/badge/Apache%20Hadoop-66CCFF?style=for-the-badge&logo=apachehadoop&logoColor=black) ![Apache Hive](https://img.shields.io/badge/Apache%20Hive-FDEE21?style=for-the-badge&logo=apachehive&logoColor=black) ![Power Bi](https://img.shields.io/badge/power_bi-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
 
 ## Objetivo
-O objetivo deste projeto é desenvolver um pipeline para movimentar dados a partir de uma fonte inicial (_flatfile_) até a apresentação de dashboard para tomada de decisão sobre plataforma Power BI.
-
-### Resumo do fluxo
-1. Arquivos disponibilizados em diretório _ad-hoc_ ``/raw``. Esta pasta indica uma local de origem externo, que poderia ser também um recurso online, API, etc.
-2. Criação de ambiente: utilizando o script ``01_criacao_ambiente.sh`` é possível configurar o ambiente, criando os diretórios necessários à operação. O nomes dos mesmos e ``paths`` devem ser configurados no arquivo ``config.ini``   
-3. Transferência dos arquivos para  o _servidor de borda_, ``/desafio/raw``. Utilizando o script disponível em `` 02_source_to_edge.sh``
-4. Transferência dos arquivos para _filesystem_ HDFS, dentro do servidor _Hadoop_ [HDFS /datalake/desafio/raw/clientes] [04_edge_to_hdfs.sh]
-5. Criação de estrutura de tabelas e carga na base relacional _Hive_ [07_process]
-6. Desenvolvimento e transformação em tabelas dimensionais e persistência das mesmas [pendente]
-7. Finalmente, desenvolvimento de dashboard (Power BI) em ``/desafio/app/Projeto Vendas.pbix``, esta implementação utiliza as tabelas dimensionais disponibilizadas em ``/desafio/gold`` 
-
-![fluxo_dados](./images/fluxo_dados.png)
-
-## Estrutura de arquivos
-```
-root
-|
-+ desafio
-+- raw
-    +- vendas.csv
-    +- ...
-+- gold
-    +- ft_vendas.csv
-    +- ...
-+- app
-    +- Projeto Vendas.pbix
-+ raw
-   +- VENDAS.csv
-+ scripts
-   +- 01_criacao_pastas.sh
-   +- pre_process
-         +- pyton
-   +- process
-         +- python
-   +- hql
-      +- create_table_...hql
-```
+O objetivo deste projeto é desenvolver um pipeline para movimentar um grande conjunto de dados (big data) a partir de uma fonte inicial (_flatfile_) até a apresentação de dashboard para tomada de decisão sobre plataforma Power BI.
 
 ### O que é big data
 Grandes conjuntos de dados que precisam ser processados e armazenados: 
@@ -67,6 +31,44 @@ Este projeto foi desenvolvido em ambiente linux utilizando a plataforma [gitpod.
 * [hive](https://hive.apache.org/)
 * [jupyter notebook](https://jupyter.org/)
 
+## Fluxo genérico dos dados
+![fluxo_dados](./images/fluxo_dados.png)
+
+
+1. Arquivos disponibilizados em diretório _ad-hoc_ ``/raw``. Esta pasta indica uma local de origem externo, que poderia ser também um recurso online, API, etc.
+   1. Criação de ambiente: utilizando o script ``01_criacao_ambiente.sh`` é possível configurar o ambiente, criando os diretórios necessários à operação. O nomes dos mesmos e ``paths`` devem ser configurados no arquivo ``config.ini``   
+2. Transferência dos arquivos para  o _servidor de borda_, ``/desafio/raw``. Utilizando o script disponível em `` 02_source_to_edge.sh``
+3. Transferência dos arquivos para _filesystem_ HDFS, dentro do servidor _Hadoop_ [HDFS ``/datalake/desafio/raw/[pasta_do_arquivo]``], utilizando ``03_transferencia_para_hdfs.sh``
+4. Criação de estrutura de tabelas e carga na base relacional _Hive_. O bash ``.\desafio\scripts\pre_process\04_criacao_tabelas_hive.sh`` deve chamar um script python: ``.\desafio\scripts\pre_process\05_criacao_DLLs_dinamicos.py``
+5. Desenvolvimento e transformação em tabelas dimensionais e persistência das mesmas no HDFS [``/datalake/desafio/gold/[pasta_do_arquivo]``] 
+6. No mesmo script (``07_copia_do_hdfs_para_local.sh``) os arquivos são movidos para novamente para pasta local ``/desafio/gold``, de onde será consumido pelo Power BI.
+7. Finalmente, desenvolvimento de dashboard (Power BI) em ``/desafio/app/Projeto Vendas.pbix``, esta implementação utiliza as tabelas dimensionais disponibilizadas em ``/desafio/gold`` 
+   
+## Estrutura de arquivos
+```
+root
+|
++ desafio
++- raw
+    +- vendas.csv
+    +- ...
++- gold
+    +- ft_vendas.csv
+    +- ...
++- app
+    +- Projeto Vendas.pbix
++ raw
+   +- VENDAS.csv
++ scripts
+   +- 01_criacao_pastas.sh
+   +- pre_process
+         +- pyton
+   +- process
+         +- python
+   +- hql
+      +- create_table_...hql
+```
+
 ### Scripts 
 Os scripts do projeto podem ser encontrados em [``/desafio/scripts``](desafio/scripts/)
 
@@ -86,52 +88,74 @@ Os scripts do projeto podem ser encontrados em [``/desafio/scripts``](desafio/sc
 ### 1. Criação dos diretórios do projeto
 O primeiro script a ser executado deve criar todos os diretórios necessários para a implementação do sistema.  
 
-Origem das informações. Arquivos csv disponíveis em diversas fontes: csv online, zipfile local, etc
-
-
-
 ```
 $ cd desafio/scripts
 $ bash 01_criacao_ambiente.sh
 ``` 
+
 ### 2. Movimentar os arquivos fonte
 Após a criação dos diretórios, o processo inicia com um conjunto de arquivos na pasta ``/raw`` (esta pasta está na raíz do projeto e não é a mesma onde serão enviadas as fontes dedados). 
 
+(*) _A origem das informações. Arquivos csv disponíveis em diversas fontes: csv online, zipfile local, etc_
+
+#### Fontes de dados
 |Tabela|Formato|Tamanho|Detalhes|
 |------|-------|-------|--------|
-|VENDAS|csv|10.83Gb|Informações de vendas, preços, descontos, etc
-|CLIENTES|csv|46.72Mb|Informações dos clientes, esta entidade permite o relacionamento com as outras 3 (a seguir)
-|ENDERECO|csv|77.87Mb|Informações do endereço ligada aos clientes e necessária para a tabela dimensional de localidade. 
-|REGIAO|csv|0.10Mb|Região da localidade 
-|DIVISAO|csv|0.05Mb|Divisão da localidade
+|VENDAS|csv|10.83GB|Informações de vendas, preços, descontos, etc
+|CLIENTES|csv|46.72MB|Informações dos clientes, esta entidade permite o relacionamento com as outras 3 (a seguir)
+|ENDERECO|csv|77.87MB|Informações do endereço ligada aos clientes e necessária para a tabela dimensional de localidade. 
+|REGIAO|csv|0.10MB|Região da localidade 
+|DIVISAO|csv|0.05MB|Divisão da localidade
 
-(*) Filesystem com os dados crus, não processados. É o primeiro estagio onde os arquivos são colocados dentro do fluxo.
+(*) _Filesystem com os dados crus, não processados. É o primeiro estagio onde os arquivos são colocados dentro do fluxo._
 
+#### Movimentação dos arquivos para o _servidor de borda_
+O primeiro passo deste processo será movimentar os arquivos da fonte, que poderiam estar em outro servidor ou formato, para a primeira pasta do servidor local. Chamaremos esta pasta de _servidor de borda_, já que entendemos que será o local de entrada das nossas informações.
 
-O primeiro passo deste processo será movimentar os arquivos da fonte, que poderiam estar em outro servidor ou formato, para a primeira pasta do nosso servidor. Chamaremos esta pasta de servidor de borda, já que entendemos que será o local de entrada das nossas informações. 
-    1. Arquivo ```/desafio/scripts/config.ini```: utilizamos um arquivo centralizado contendo as variáveis que serão utilizadas no projeto. Decidimos pela utilização deste formato já que atende tanto os scripts do tipo ```bash```, quanto ```python``` 
-    2. Arquivo ```/desafio/scripts/move_files_to_edge.sh```: este primeiro script recupera o nome das entidades (arquivos) que se encontram na pasta de origem e itera o nome de cada um deles realizando 2 ações principais: 
-       1. Mover o arquivo para a pasta informada
-       2. Alterar o nome dos arquivos para lowercase
-    3. Para rodar o script deve executar: 
-       1. ```$ cd /desafio/scripts```
-       2. ```$ bash move_files_to_edge.sh```
-    4. O resultado desta operação deve finalizar na cópia dos arquivos no diretório ```/desafio/raw``` 
+* Arquivo ``/desafio/scripts/config.ini``: utilizamos um arquivo centralizado contendo as variáveis que serão utilizadas no projeto. Decidimos pela utilização deste formato já que atende tanto os scripts do tipo ``bash``, quanto ``python`` 
+* Arquivo ``/desafio/scripts/02_transferencia_para_edge_node.sh``: este primeiro script recupera o nome das entidades (arquivos) que se encontram na pasta de origem e itera o nome de cada um deles realizando 2 ações principais: 
+       
+   1. Mover o arquivo para a pasta informada
+   2. Alterar o nome dos arquivos para lowercase
+
+Para rodar o script deve executar: 
+```
+$ cd /desafio/scripts
+$ bash 02_transferencia_para_edge_node.sh
+```
+
+O resultado desta operação deve ser a cópia dos arquivos no diretório ``/desafio/raw`` 
 
 ### 3. Movimentação de arquivos para HDFS
-O segundo passo será movimentar os arquivos recebidos para o servidor HDFS que está conteinerizado.
-   1. Para realizar esta operação será necessário executar o script ```/desafio/scripts/move_to_hdfs.sh``` que fará a operação:
-   2. Os arquivos serão movimentados para a pasta HDFS ```/datalake/desafio/raw``` 
-   
-(*) Arquivos são transferidos a uma pasta dentro do datalake HDFS. Assim como no ponto 2, a pasta raw conterá os arquivos sem tratamento.
+O segundo passo será movimentar os arquivos recebidos para o servidor HDFS que está conteinerizado (docker ``namenode``).
 
+Para realizar esta operação será necessário executar:
+```
+$ cd /desafio/scripts
+$ bash 03_transferencia_para_hdfs.sh
+``` 
+
+...que fará a seguinte operação:
+
+Os arquivos serão movimentados para a pasta HDFS ``/datalake/desafio/raw`` 
+   
+(*) _Arquivos são transferidos a uma pasta dentro do datalake HDFS. Assim como no ponto 2, a pasta raw conterá os arquivos sem tratamento._
 
 ### 4. Criação dinámica de DLLs
-Uma vez que as informações estejam disponíveis no servidor HDFS, será o momento de criar os DLLs para as tabelas. 
-   1. Através de um script ```python```, será lido cada um dos arquivos e extraído deles os cabeçalhos com o nome das colunas. 
-   2. Com esta informação, será criado - para cada tabela - script de criação ```hql``` que posteriormente será chamado através de um comando *beeline* ```hive```. 
-   3. Estes scripts podem ser encontrados na pasta ```/desafio/scripts/hql/create_table_[nome_da_tabela].hql``` 
 
+Uma vez que as informações estejam disponíveis no servidor HDFS, será o momento de criar os DLLs para as tabelas. 
+
+Através de um script ``python``, será lido cada um dos arquivos e extraído deles os cabeçalhos com o nome das colunas. Com esta informação, será criado - para cada tabela - script de criação ``hql`` que posteriormente será chamado através de um comando *beeline* no ``hive``. 
+
+Estes scripts podem ser encontrados na pasta ``/desafio/scripts/hql/create_table_[nome_da_tabela].hql`` 
+
+Para executar este script: 
+
+```
+$ cd /desafio/scripts
+$ bash 04_criacao_tabelas_hive.sh
+```
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ### 5. Criação de tabelas
 Com as informações no servidor Hadoop e as DLLs criadas, chega o momento de executar a criação das bases de dados, tabelas e carga de dados. 
    1. Para realizar esta operação, o script ```/desafio/scripts/upload_to_hive.sh``` deve, mas uma vez, recuperar os nomes de todas as tabelas e processar para cada uma delas, a criação das tabelas externas e gerenciadas, assim como realizar a vinculação das mesmas a partir dos arquivos já mencionados.
