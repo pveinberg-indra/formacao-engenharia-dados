@@ -4,3 +4,6 @@ desafio/logs/*.log
 desafio/scripts/hql/*.hql
 desafio/gold/*
 git_fix.sh
+desafio/scripts/cleanning_data_v3.ipynb
+desafio/scripts/process_clean_data.py
+desafio/scripts/process_clean_data_v02.py
